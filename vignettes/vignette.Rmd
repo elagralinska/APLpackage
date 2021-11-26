@@ -87,7 +87,7 @@ set.seed(1234)
 **CHANGE FILE PATH OR FIND OTHER SOLUTION**
 ```{r load_data, message=FALSE, warning=FALSE}
 # Load the PBMC dataset
-pbmc.data <- Read10X(data.dir = "/project/kohl_data/datasets/pbmc3k/filtered_gene_bc_matrices/hg19/")
+pbmc.data <- Read10X(data.dir = "/project/markers/CA/manuscript_scdata/sc_data_PBMC3k/original_data/pbmc3k_filtered_gene_bc_matrices/filtered_gene_bc_matrices/hg19/")
 
 # Remove genes not expressed in any gene.
 no_zeros_rows <- rowSums(pbmc.data) > 0

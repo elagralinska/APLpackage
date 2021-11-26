@@ -15,8 +15,9 @@ bioRxiv 2020.10.23.352096; doi: https://doi.org/10.1101/2020.10.23.352096
     install_github("ClemensKohl/APL")
     
 ## Pytorch installation
-In order to speed up the singular value decomposition, we highly recommend the installation of pytorch.
-Users can instead also opt to instead use the slower R native SVD. For this please turn the argument `python = FALSE` wherever applicable in this vignette.
+
+In order to speed up the singular value decomposition, we highly recommend the installation of `pytorch`.
+Users can instead also opt to use the slower R native SVD. For this, please turn the argument `python = FALSE` wherever applicable in this vignette.
 
 ### Install pytorch with reticulate
 
@@ -28,7 +29,7 @@ Users can instead also opt to instead use the slower R native SVD. For this plea
 ### Manually install pytorch with conda
 
 Download the appropriate Miniconda installer for your system from [the conda website](https://docs.conda.io/en/latest/miniconda.html). 
-Follow the installation instructions on their website and make sure the R package reticulate is also installed before proceeding.
+Follow the installation instructions on their website and make sure the R package `reticulate` is also installed before proceeding.
 Once installed, list all available conda environments via <br>
 `conda info --envs` <br>
 One of the environments should have `r-reticulate` in its name. Depending on where
@@ -46,4 +47,4 @@ Please run
     
     vignette("APL")
 
-after installation for an introduction into the packge.
+after installation for an introduction into the package.

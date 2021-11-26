@@ -37,10 +37,10 @@ Elzbieta Gralinska, Martin Vingron
 bioRxiv 2020.10.23.352096; doi: https://doi.org/10.1101/2020.10.23.352096
 ```
 
-For mathematical description of the method, please refer to the manuscript.
+For a mathematical description of the method, please refer to the manuscript.
 
 # Pytorch installation
-In order to speed up the singular value decomposition, we highly recommend the installation of pytorch.
+In order to speed up the singular value decomposition, we highly recommend the installation of `pytorch`.
 Users can instead also opt to instead use the slower R native SVD. For this please turn the argument `python = FALSE` wherever applicable in this vignette.
 
 
@@ -54,12 +54,12 @@ conda_install(envname = "r-reticulate", packages = "pytorch")
 
 ## Manually install pytorch with conda
 Download the appropriate Miniconda installer for your system from [the conda website](https://docs.conda.io/en/latest/miniconda.html). 
-Follow the installation instructions on their website and make sure the R package reticulate is also installed before proceeding.
+Follow the installation instructions on their website and make sure the R package `reticulate` is also installed before proceeding.
 Once installed, list all available conda environments via <br>
 `conda info --envs` <br>
 One of the environments should have `r-reticulate` in its name. Depending on where
 you installed it and your system, the exact path might be different.
-Activate the environment and install pytorch into it.
+Activate the environment and install `pytorch` into it.
 
 ```{bash conda, eval=FALSE}
 conda activate ~/.local/share/r-miniconda/envs/r-reticulate # change path accordingly.
@@ -70,7 +70,7 @@ conda install pytorch
 
 # Preprocessing
 ## Setup
-For this vignette we will use peripheral blood mononuclear cell (PBMC) data from 10x Genomics.
+For this vignette we will use 3k Peripheral Blood Mononuclear Cell (PBMC) data from 10x Genomics.
 The data necessary to follow the vignette can be downloaded from [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
 Besides the package `r Rpackage("APL")` we will be using the single-cell RNAseq analysis suite `r CRANpkg("Seurat")` (V. 4.0.4) to preprocess the data, but the preprocessing could equally be done with `r Biocpkg("SingleCellExperiment")` and `r Biocpkg("scater")`\\`r Biocpkg("scran")`.
 For the preprocessing we follow the [Guided Clustering Tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) from the Seurat vignettes. For details about the data preprocessing please to refer to their website.
@@ -150,9 +150,9 @@ DimPlot(pbmc, reduction = "umap", label = F, pt.size = 0.5)
 ```
 
 # Correspondence Analysis
-In a first step we perform Correspondence Analysis (CA) on the log normalized 
+In a first step we perform correspondence analysis (CA) on the log-normalized 
 counts from the data. CA is a method for dimensionality reduction similar to PCA,
-but allows one to represent both cells and genes in the same space. 
+but allows to represent both cells and genes in the same space. 
 
 ```{r cacomp}
 # CA on logcounts
@@ -168,7 +168,7 @@ ca <- cacomp(obj = pbmc,
 
 ```
 
-The function `cacomp` takes as input  any non-negative count matrix, be it single-cell, bulk RNA-seq or other data. If we would like to perform feature selection before CA, we can set the argument `top` to the desired number of genes to keep based on the variance of the chi-square components matrix. 
+The function `cacomp` takes as input any non-negative count matrix, be it a single-cell RNA-seq, bulk RNA-seq or other data. If we would like to perform feature selection before CA, we can set the argument `top` to the desired number of genes to keep based on the variance of the chi-square components matrix. 
 For ease of use it additionally accepts `r CRANpkg("Seurat")` and `r Biocpkg("SingleCellExperiment")` objects, however for these we have to additionally have to specify via the `assay` and/or `slot` (for Seurat) parameter from where to extract the data. The output of `cacomp` is an object of class `cacomp`:
 ```{r print_cacomp}
 ca
@@ -215,7 +215,7 @@ ca_3Dplot(ca, col_labels = platelets)
 
 ```
 
-The above plots lets us interactively explore the CA space. If a static version is preferred we can obtain it by setting `type = "ggplot"`. This option is available for all plotting functions with interactive plots (with the exception of the 3D plot).
+The above plots let us interactively explore the CA space. If a static version is preferred we can obtain it by setting `type = "ggplot"`. This option is available for all plotting functions with interactive plots (with the exception of the 3D plot).
 
 ## Choosing the dimensionality
 Often we want to only keep as many dimensions of our data as is necessary in order to denoise the data and speed up downstream analysis. For PCA, this is traditionally done by identifying the "bend" in the scree plot of the exaplained variability. For CA we instead look at the inertia that is explained by the data:
@@ -226,7 +226,7 @@ pick_dims(ca,
   xlim(c(0,75))
 ```
 
-In the scree plot above we can see that the first dimension only explains ~0.75% of the inertia in the data and the the bend in the scree plot is at roughly 10 dimensions. The first dimensions however explain only a small part of the total inertia. 
+In the scree plot above we can see that the first dimension explains only ~0.75% of the inertia in the data and the the bend in the scree plot is at roughly 10 dimensions. The first dimensions however explain only a small part of the total inertia. 
 Instead of relying only on the scree plot, we can use the "elbow rule", a formalized version of the above method. We compare the inertia that is explained by randomizing the data and choose the cutoff as all the dimensions that explain more inertia than the permuted data.
 
 ```{r pick_dims, results = "hide"}
@@ -262,7 +262,7 @@ ca <- subset_dims(ca, dims = pd)
 
 # Association Plots
 
-In many scRNA-seq experiments we are interested in which genes define a specific cluster. We can easily visualize these genes in an Association plot. An Association plot allows us to effectivily visualize the relationship between a group of cells (a condition) and genes. Here we chose the platelet cells as our group of interest:
+In many scRNA-seq experiments we are interested in which genes define a specific cluster. We can easily visualize these genes in an Association Plot. An Association Plot allows us to effectivily visualize the relationship between a cluster of cells (a condition) and genes. Here we chose the platelet cells as our group of interest:
 ```{r apl_platelets}
 # Calculate APL coordinates
 ca <- apl_coords(ca, group = platelets)
@@ -276,11 +276,11 @@ apl(ca,
     rows_idx = c("ITGA2B", "PF4", "GP1BA", "TUBB1"), #platelet marker genes
     type = "ggplot")
 ```
-Cells part of the chosen condition are colored in red, all others in green and genes are blue circles.
+Cells that are a part of the chosen cell cluster are colored in red, all other cells are colored in green. Genes are represented by blue circles.
 
-The further right a gene is located the more highly associated it is with the chosen condition. Additionally, the lower the y-axis value, the more specific it is to the group. As we can see in the plot, typical Platelet marker genes are located to the right of the plot. If we are interested in not only the genes associated with a condition, but also other cells, we can additionally plot the cells in the same plot through the argument `show_cols = TRUE`. This way we can identify other clusters that are highly similar or cells that should be merged with the chose condition.
+The further to the right a gene is located the more associated it is with the chosen cluster of cells. Additionally, the lower the y-axis value, the more specific it is for the selected cluster. As we can see in the plot, known platelet marker genes are located in the right partof the plot. If we are interested in not only the genes associated with a selected cluster of cells, but also other cells, we can additionally plot the cells in the same plot through the argument `show_cols = TRUE`. This way we can identify other clusters that are highly similar or cells that should be merged with the chose condition.
 
-The APL Score encompasses both of the above mentioned aspects of condition specificity and allows us to rank genes by how relevant they are for a condition/cluster:
+The Salpha score encompasses both of the above mentioned aspects of condition specificity and allows us to rank genes by how relevant they are for a condition/cluster:
 
 ```{r apl_score, results = "hide"}
 # Calculates APL score
@@ -299,15 +299,15 @@ apl(ca,
 ```
 
 By default, only genes that have a score larger than 0 are colored as these tend to be genes of interest.
-However, for some datasets this cutoff is not suitable and can easily be change through the `score_cutoff` argument to `apl()`.
+However, for some datasets this cutoff is not suitable and can easily be changed through the `score_cutoff` argument to `apl()`.
 
 We can also have a look directly at the scores:
 ```{r print_score}
 head(ca@APL_score)
 ```
 
-In the top 6 most highly ranked genes we can find typical platelet markers such as GP9 (Glycoprotein IX Platelet) or ITGA2B (Integrin Subunit Alpha 2b).
-We can also plot these genes through functions provided in `r CRANpkg("Seurat")`:
+In the top 6 most highly ranked genes we can find well-known platelet marker genes such as GP9 (Glycoprotein IX Platelet) or ITGA2B (Integrin Subunit Alpha 2b).
+We can also plot these genes by using functions provided in `r CRANpkg("Seurat")`:
 
 ```{r seurat_apl, fig.wide = TRUE}
 VlnPlot(pbmc, features = head(ca@APL_score$Rowname,3))
@@ -318,8 +318,8 @@ As expected, the 3 most highly scored genes are extremely specific to the platel
 
 ## APL and Gene Enrichment Analysis
 
-Association plot can be used to help annotate a cluster and to identify a cluster. 
-Lets have a closer look at cluster 3. We first calculate the the APL coordinates for both cells and genes and then score the genes.
+Association Plot can be used to help annotate a cluster and to identify a cluster. 
+Lets have a closer look at cluster 3. We first calculate the the Association Plot coordinates for both cells and genes, and then the Salpha score for the genes.
 ```{r cluster_three, results="hide"}
 # Get indices of cells in cluster 3
 c_three <- which(pbmc$seurat_clusters == 3)
@@ -346,7 +346,7 @@ enr <- apl_topGO(ca,
 plot_enrichment(enr)
 ```
 
-The gene enrichment clearly suggests that cells in cluster 3 are B cells. We can further look at a number of typical B cell marker genes in the APL.
+The GO enrichment analysis clearly suggests that cells in cluster 3 are B cells. We can further look at the number of typical B cell marker genes in the Association Plot.
 
 ```{r bcell_apl, fig.wide = TRUE}
 
@@ -363,7 +363,7 @@ apl(ca,
 
 ```
 
-All of these B cell marker genes are clearly highly associated with cluster 3, which confirms the correct annotation we did in the preprocessing of the data.
+All of these B cell marker genes are clearly highly associated with the cluster 3, which confirms the correct annotation we did in the preprocessing of the data.
 
 ## APL wrapper
 

@@ -350,7 +350,7 @@ FeaturePlot(pbmc, features = head(ca@APL_score$Rowname,3))
 
 As expected, the 3 most highly scored genes are extremely specific to the platelet cluster.
 
-## APL and Gene Enrichment Analysis
+# APL and GO enrichment analysis
 
 Association Plot can be used to help annotate a cluster and to identify a cluster. 
 Lets have a closer look at cluster 3. We first calculate the the Association Plot coordinates for both cells and genes, and then the Salpha score for the genes.

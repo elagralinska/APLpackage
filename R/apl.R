@@ -4,7 +4,7 @@ NULL
 #' Calculate Association Plot coordinates
 #'
 #' @description
-#' Calculates the association plot coordinates for either the rows, columns or both (default).
+#' Calculates the Association Plot coordinates for either the rows, columns or both (default).
 #'
 #' @details
 #' Coordinates (x,y) of row vector \eqn{\vec{r}} are defined as
@@ -16,7 +16,7 @@ NULL
 #' Returns input "cacomp" object and adds components "apl_rows" and/or "apl_cols" for row and column coordinates.
 #' In "group" the indices of the columns used to calculate the centroid are saved.
 #'
-#' @param caobj A "cacomp" object with principal row coordinates and standard column coordinates calculated.
+#' @param caobj A "cacomp" object with principal row coordinates and standardized column coordinates calculated.
 #' @param group Numeric/Character. Vector of indices or column names of the columns to calculate centroid/x-axis direction.
 #' @param calc_rows TRUE/FALSE. Whether apl row coordinates should be calculated. Default TRUE.
 #' @param calc_cols TRUE/FALSE. Whether apl column coordinates should be calculated. Default TRUE.
@@ -24,7 +24,7 @@ NULL
 #'
 #' @examples
 #' set.seed(1234)
-#' # Simulate scRNAseq data.
+#' # Simulate scRNAseq data
 #' cnts <- data.frame(cell_1 = rpois(10, 5),
 #'                    cell_2 = rpois(10, 10),
 #'                    cell_3 = rpois(10, 20),
@@ -32,9 +32,9 @@ NULL
 #' rownames(cnts) <- paste0("gene_", 1:10)
 #' cnts <- as.matrix(cnts)
 #'
-#' # Run correspondence analysis.
+#' # Run correspondence analysis
 #' ca <- cacomp(obj = cnts, princ_coords = 3)
-#' # Calculate APL coordinates:
+#' # Calculate APL coordinates
 #' ca <- apl_coords(ca, group = 3:4)
 apl_coords <- function(caobj, group, calc_rows = TRUE, calc_cols = TRUE){
 
@@ -58,7 +58,7 @@ apl_coords <- function(caobj, group, calc_rows = TRUE, calc_cols = TRUE){
       warning("Not all names in 'group' are contained in the column names. Non-matching values were ignored.")
     }
   } else {
-    stop("Parameter group hast to be either of type 'numeric' or 'character'.")
+    stop("Parameter group has to be either of type 'numeric' or 'character'.")
   }
 
   if (length(group) == 1){
@@ -127,7 +127,7 @@ apl_coords <- function(caobj, group, calc_rows = TRUE, calc_cols = TRUE){
 #' Returns the input "cacomp" object with "APL_score" component added.
 #' APL_score contains a data frame with ranked rows, their score and their original row number.
 #'
-#' @param caobj A "cacomp" object with principal row coordinates and standard column coordinates calculated.
+#' @param caobj A "cacomp" object with principal row coordinates and standardized column coordinates calculated.
 #' @param mat A numeric matrix. For sequencing a count matrix, gene expression values with genes in rows and samples/cells in columns.
 #' Should contain row and column names.
 #' @param dims Integer. Number of CA dimensions to retain. Needs to be the same as in caobj!
@@ -281,7 +281,7 @@ apl_score <- function(caobj, mat, dims = caobj@dims, group = caobj@group, reps=1
 #' @return
 #' A data.frame containing the gene sets with the highest overrepresentation.
 #'
-#' @param caobj A "cacomp" object with principal row coordinates and standard column coordinates calculated.
+#' @param caobj A "cacomp" object with principal row coordinates and standardized column coordinates calculated.
 #' @param ontology Character string. Chooses GO sets for 'BP' (biological processes), 'CC' (cell compartment) or 'MF' (molecular function).
 #' @param organism Character string. Either 'hs' (homo sapiens), 'mm' (mus musculus) or the name of the organism package such as 'org.*.eg.db'.
 #' @param ngenes Numeric. Number of top ranked genes to test for overrepresentation.
@@ -289,7 +289,7 @@ apl_score <- function(caobj, mat, dims = caobj@dims, group = caobj@group, reps=1
 #' @param use_coords Logical. Whether the x-coordinates of the row APL coordinates should be used for ranking.
 #' Only recommended when no S-alpha score (see apl_score()) can be calculated.
 #' @param return_plot Logical. Whether a plot of significant gene sets should be additionally returned.
-#' @param top_res Numeric. Number of top scoring gene sets to plot.
+#' @param top_res Numeric. Number of top scoring genes to plot.
 #'
 #' @export
 #' @examples
@@ -405,10 +405,10 @@ apl_topGO <- function(caobj,
 #' Association Plot
 #'
 #' @description
-#' Plot an Association plot for the chosen columns.
+#' Plot an Association Plot for the chosen columns.
 #'
 #' @details
-#' For an interactive plot type="plotly" can be chosen, otherwise a static plot will returned.
+#' For an interactive plot type="plotly" can be chosen, otherwise a static plot will be returned.
 #' The row and column coordinates have to be already calculated by `apl_coords()`.
 #'
 #' @return
@@ -736,10 +736,10 @@ apl <- function(caobj,
 
 }
 
-#' Compute and plot Association plot
+#' Compute and plot Association Plot
 #'
 #' @description
-#' Computes singular value decomposition and coordinates for the Association plot.
+#' Computes singular value decomposition and coordinates for the Association Plot.
 #'
 #' @details
 #' The function is a wrapper that calls `cacomp()`, `apl_coords()`, `apl_score()` and finally `apl()` for ease of use.
@@ -747,7 +747,7 @@ apl <- function(caobj,
 #' can be also run individually for the same results.
 #' If score = FALSE, nrow and reps are ignored. If mark_rows is not NULL score is treated as if FALSE.
 #' @return
-#' Association plot (plotly object).
+#' Association Plot (plotly object).
 #'
 #' @param obj A numeric matrix, Seurat or SingleCellExperiment object. For sequencing a count matrix, gene expression values with genes in rows and samples/cells in columns.
 #' Should contain row and column names.
@@ -760,7 +760,7 @@ apl <- function(caobj,
 #' @param mark_rows Character vector. Names of rows that should be highlighted in the plot. If not NULL, score is ignored. Default NULL.
 #' @param mark_cols Character vector. Names of cols that should be highlighted in the plot.
 #' @param reps Integer. Number of permutations during scoring. Default 3.
-#' @param python A logical value indicating whether to use singular-value decomposition from the python package torch.
+#' @param python A logical value indicating whether to use singular value decomposition from the python package torch.
 #' This implementation dramatically speeds up computation compared to `svd()` in R.
 #' @param row_labs Logical. Whether labels for rows indicated by rows_idx should be labeled with text. Default TRUE.
 #' @param col_labs Logical. Whether labels for columns indicated by cols_idx shouls be labeled with text. Default TRUE.
@@ -932,7 +932,7 @@ setMethod(f = "runAPL",
 
 
 #' @description
-#' runAPL.SingleCellExperiment: Computes singular value decomposition and coordinates for the Association plot from SingleCellExperiment objects with reducedDim(obj, "CA") slot (optional).
+#' runAPL.SingleCellExperiment: Computes singular value decomposition and coordinates for the Association Plot from SingleCellExperiment objects with reducedDim(obj, "CA") slot (optional).
 #'
 #' @param assay Character. The assay from which extract the count matrix for SVD, e.g. "RNA" for Seurat objects or "counts"/"logcounts" for SingleCellExperiments.
 #'
@@ -1017,7 +1017,7 @@ setMethod(f = "runAPL",
 
 
 #' @description
-#' runAPL.Seurat: Computes singular value decomposition and coordinates for the Association plot from Seurat objects, optionally with a DimReduc Object in the "CA" slot.
+#' runAPL.Seurat: Computes singular value decomposition and coordinates for the Association Plot from Seurat objects, optionally with a DimReduc Object in the "CA" slot.
 #'
 #' @param assay Character. The assay from which extract the count matrix for SVD, e.g. "RNA" for Seurat objects or "counts"/"logcounts" for SingleCellExperiments.
 #' @param slot character. The Seurat assay slot from which to extract the count matrix.

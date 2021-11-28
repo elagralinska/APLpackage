@@ -226,8 +226,117 @@ DimPlot(pbmc, reduction = "CA", label = FALSE, pt.size = 0.5)
 
 ```
 
+
+## Reducing the number of CA dimensions
+When working with high-dimensional data, after singular value decomposition there will be often many dimensions which will be representing the noise in the data. That's why generating Association Plots should be preceded by data dimension reduction step. 
+
+The number of dimensions to retain can be computed using the function `pick_dims`. This function offers three standard methods which we implemented:
+* elbow rule (`method = "elbow_rule"`) - the number of dimensions to retain is calculated based on scree plots generated for randomized data and corresponds to a point in the plot where the band of randomized singular values enters the band of the original singular values,
+* 80% rule (`method = "maj_inertia"`) - only those first dimensions are retained which in total account for >= 80% of total inertia,
+* average rule (`method = "avg_inertia"`) - only those dimensions are retained which account for more inertia than a single dimension on average.
+
+Additionally, the user can compute a scree plot to choose the number of dimensions by themselves:
+
+```{r scree_plot}
+pick_dims(ca,
+          method = "scree_plot") +
+  xlim(c(0,75))
+```
+
+In the scree plot above we can see that the first dimension explains only ~0.75% of the total inertia and we observe the "jump" in the scree plot at roughly 10 dimensions. The first dimensions however explain only a small part of the total inertia. 
+
+Here we compute the number of dimensions using elbow rule. For demonstration, only five data permutations are computed:
+
+```{r pick_dims, results = "hide"}
+pd <- pick_dims(ca,
+          mat = GetAssayData(pbmc, slot = "data"),
+          method = "elbow_rule",
+          reps = 5, 
+          python = TRUE)
+```
+```{r show_dims, message=FALSE}
+pd
+```
+
+In this case the elbow rule leads to a much higher number of dimensions. 
+
+```{r expl_inert}
+# Compute the amount of inertia explained by each of the dimensions
+expl_inertia <- (ca@D^2/sum(ca@D^2))*100
+
+# Compute the amount of intertia explained by number of dimensions defined by elbow rule
+sum(expl_inertia[seq_len(pd)])
+```
+
+In this example the elbow rule suggests to keep `r pd` dimensions that explain `r round(sum(expl_inertia[seq_len(pd)]),2)`% of the total inertia from the data.
+
+Finally, we can reduce the data dimension to the desired number of dimensions:
+```{r subset_dims}
+ca <- subset_dims(ca, dims = pd)
+```
+
+
+## Association Plots
+
+When working with single-cell transcriptomics data we are often interested in which genes are associated to a cluster of cells. To reveal such genes we can compute an Association Plot for a selected cluster of cells. In the following example we want to generate an Association Plot for the cluster of platelets:
+```{r apl_platelets}
+# Calculate Association Plot coordinates for platelets from 3k PBMC data
+ca <- apl_coords(ca, group = platelets)
+```
+
+After computing the coordinates of genes and cells in the Association Plot we are able to plot the results using the `apl` function. 
+```{r apl_platelets_plot, fig.wide = TRUE}
+# Plot APL
+apl(ca,
+    row_labs = TRUE,
+    rows_idx = c("ITGA2B", "PF4", "GP1BA", "TUBB1"), #platelet marker genes
+    type = "ggplot")
+```
+In the Association Plot all genes are represented by blue circles. The further to the right a gene is located the more associated it is with the chosen cluster of cells. Additionally, the lower the y-axis value, the more specific it is for the selected cluster.
+Additionally, it is possible to highlight in the Association Plot any set of genes. In the example above we additionally highlighted four genes ("ITGA2B", "PF4", "GP1BA", "TUBB1") which are known to be marker genes for platelets. As we can see in the plot, they are located in the right part of the plot, which confirms their specificity for platelets. 
+
+By default we plot only the genes in the Association Plot. To also display the cells in the Association Plot, use the argument `show_cols = TRUE`. This way we can identify other cells which show similar expression profiles to the cells of interest. Cells that belong to the cluster of interest will be colored in red, and all remaining cells will be colored in green.
+
+## Association Plots with the $S_\alpha$ scores
+
+Computing the $S_\alpha$ scores, a measure of cluster-specificity of a gene, allows us to rank genes by their specificity for a selected cluster. The $S_\alpha$ scores can be computed using the `apl_score` function. To show the $S_\alpha$ scores in the Association Plot use the argument `show_score = TRUE` in the `apl` function:
+
+```{r apl_score, results = "hide"}
+# Compute Salpha score
+# For the calculation the input matrix is also required.
+ca <- apl_score(ca,
+                mat = as.matrix(GetAssayData(object = pbmc, slot = "data")),
+                reps = 5,
+                python = TRUE)
+```
+```{r apl_plot_platelets, fig.wide = TRUE}
+apl(ca,
+    show_score = TRUE,
+    show_cols = FALSE,
+    type = "plotly")
+
+```
+
+By default, only genes that have a score larger than 0 are colored as these tend to be genes of interest.
+However, for some datasets this cutoff is not suitable and can easily be changed through the `score_cutoff` argument to `apl()`.
+
+The $S_\alpha$ scores are stored in `ca@APL_score`:
+```{r print_score}
+head(ca@APL_score)
+```
+
+To see the expression of genes with the highest $S_\alpha$ scores (or any selected genes) across all cell types from the data we can use the functions provided by `r CRANpkg("Seurat")`:
+
+```{r seurat_apl, fig.wide = TRUE}
+VlnPlot(pbmc, features = head(ca@APL_score$Rowname,3))
+FeaturePlot(pbmc, features = head(ca@APL_score$Rowname,3))
+```
+
+As expected, the 3 most highly scored genes are over-expressed in the platelet cluster.
+
+
 ## Visualization of CA
-In addition to Association Plots "APL" produces also other forms of the output. For instance, we can use "APL" to generate a two- and three-dimensional projection of the data in the correspondence analysis space. The so-called biplot visualizes then both cells and genes from the input data. To generate such biplots a `cacomp` object is required. We can convert `r CRANpkg("Seurat")` or `r Biocpkg("SingleCellExperiment")` objects, which have the CA results stored, to a `cacomp` object using the function `as.cacomp()`:
+In addition to Association Plots "APL" produces also other forms of the output. For instance, we can use "APL" to generate a two- and three-dimensional correspondence analysis projection of the data. The so-called biplot visualizes then both cells and genes from the input data. To generate such biplots a `cacomp` object is required. We can convert `r CRANpkg("Seurat")` or `r Biocpkg("SingleCellExperiment")` objects, which have the CA results stored, to a `cacomp` object using the function `as.cacomp()`:
 
 ```{r biplot, fig.wide = TRUE}
 # Converting the object pbmc
@@ -251,114 +360,16 @@ ca_3Dplot(ca, col_labels = platelets)
 
 The above described plots let us interactively explore the CA projection of the data. For a static version of the plot the paramter `type = "ggplot"` should be used. This option is available for all plotting functions with interactive plots (except for the three-dimensional data projection).
 
-## Choosing the dimensionality
-Often we want to only keep as many dimensions of our data as is necessary in order to denoise the data and speed up downstream analysis. For PCA, this is traditionally done by identifying the "bend" in the scree plot of the exaplained variability. For CA we instead look at the inertia that is explained by the data:
-
-```{r scree_plot}
-pick_dims(ca,
-          method = "scree_plot") +
-  xlim(c(0,75))
-```
-
-In the scree plot above we can see that the first dimension explains only ~0.75% of the inertia in the data and the the bend in the scree plot is at roughly 10 dimensions. The first dimensions however explain only a small part of the total inertia. 
-Instead of relying only on the scree plot, we can use the "elbow rule", a formalized version of the above method. We compare the inertia that is explained by randomizing the data and choose the cutoff as all the dimensions that explain more inertia than the permuted data.
-
-```{r pick_dims, results = "hide"}
-pd <- pick_dims(ca,
-          mat = GetAssayData(pbmc, slot = "data"),
-          method = "elbow_rule",
-          reps = 5, 
-          python = TRUE)
-```
-```{r show_dims, message=FALSE}
-pd
-```
-This gives us a much higher number of dimensions. 
-```{r expl_inert}
-# Calculates explained inertia of each dimension
-expl_inertia <- (ca@D^2/sum(ca@D^2))*100
-
-# Sum of expl. intertia kept by elbow method
-sum(expl_inertia[seq_len(pd)])
-```
-
-In total, the elbow method would suggest to keep `r pd` dimensions that explain `r round(sum(expl_inertia[seq_len(pd)]),2)`% of the total inertia in the data.
-
-Other methods to determine the dimensionality are also implemented:
-* "avg_inertia" calculates the number of dimensions in which the inertia is above the average inertia. 
-* "maj_inertia" calculates the number of dimensions in which cumulatively explain up to 80% of the total inertia.
-
-Finally, we can subset the data to the desired number of dimensions:
-```{r subset_dims}
-ca <- subset_dims(ca, dims = pd)
-```
-
-
-# Association Plots
-
-In many scRNA-seq experiments we are interested in which genes define a specific cluster. We can easily visualize these genes in an Association Plot. An Association Plot allows us to effectivily visualize the relationship between a cluster of cells (a condition) and genes. Here we chose the platelet cells as our group of interest:
-```{r apl_platelets}
-# Calculate APL coordinates
-ca <- apl_coords(ca, group = platelets)
-```
-
-Then we can the results trough the `apl` function. The x-axis can be interpreted as the average coordinates of the platelets. APL allows us to plot the relationship of cells and genes to the chosen condition in 2D, irrespective of the dimensionality of the data.
-```{r apl_platelets_plot, fig.wide = TRUE}
-# Plot APL
-apl(ca,
-    row_labs = TRUE,
-    rows_idx = c("ITGA2B", "PF4", "GP1BA", "TUBB1"), #platelet marker genes
-    type = "ggplot")
-```
-Cells that are a part of the chosen cell cluster are colored in red, all other cells are colored in green. Genes are represented by blue circles.
-
-The further to the right a gene is located the more associated it is with the chosen cluster of cells. Additionally, the lower the y-axis value, the more specific it is for the selected cluster. As we can see in the plot, known platelet marker genes are located in the right partof the plot. If we are interested in not only the genes associated with a selected cluster of cells, but also other cells, we can additionally plot the cells in the same plot through the argument `show_cols = TRUE`. This way we can identify other clusters that are highly similar or cells that should be merged with the chose condition.
-
-The Salpha score encompasses both of the above mentioned aspects of condition specificity and allows us to rank genes by how relevant they are for a condition/cluster:
-
-```{r apl_score, results = "hide"}
-# Calculates APL score
-# For the calculation the input matrix is also required.
-ca <- apl_score(ca,
-                mat = as.matrix(GetAssayData(object = pbmc, slot = "data")),
-                reps = 5,
-                python = TRUE)
-```
-```{r apl_plot_platelets, fig.wide = TRUE}
-apl(ca,
-    show_score = TRUE,
-    show_cols = FALSE,
-    type = "plotly")
-
-```
-
-By default, only genes that have a score larger than 0 are colored as these tend to be genes of interest.
-However, for some datasets this cutoff is not suitable and can easily be changed through the `score_cutoff` argument to `apl()`.
-
-We can also have a look directly at the scores:
-```{r print_score}
-head(ca@APL_score)
-```
-
-In the top 6 most highly ranked genes we can find well-known platelet marker genes such as GP9 (Glycoprotein IX Platelet) or ITGA2B (Integrin Subunit Alpha 2b).
-We can also plot these genes by using functions provided in `r CRANpkg("Seurat")`:
-
-```{r seurat_apl, fig.wide = TRUE}
-VlnPlot(pbmc, features = head(ca@APL_score$Rowname,3))
-FeaturePlot(pbmc, features = head(ca@APL_score$Rowname,3))
-```
-
-As expected, the 3 most highly scored genes are extremely specific to the platelet cluster.
 
 # APL and GO enrichment analysis
 
-Association Plot can be used to help annotate a cluster and to identify a cluster. 
-Lets have a closer look at cluster 3. We first calculate the the Association Plot coordinates for both cells and genes, and then the Salpha score for the genes.
+After computing an Association Plot and identifying a set of genes specific for a selected cluster of cells we might be interested in conducting a Gene Ontology (GO) enrichment analysis of the identified gene set. The GO enrichment analysis of the B-cell specific genes (cluster 3 from the input data) idenitfied using Association Plot we first need to compute the coordinates of the genes in the Association Plot for B cells, as way as the $S_\alpha$ score for each gene: 
+
 ```{r cluster_three, results="hide"}
-# Get indices of cells in cluster 3
+# Get indices of cells in cluster 3 (B cells)
 c_three <- which(pbmc$seurat_clusters == 3)
 
-# Calculate coordinates and score genes.
+# Calculate Association Plot coordinates of the genes and the Salpha scores
 ca <- apl_coords(ca, group = c_three)
 ca <- apl_score(ca,
                 mat = as.matrix(GetAssayData(object = pbmc, slot = "data")),
@@ -366,7 +377,7 @@ ca <- apl_score(ca,
                 python = TRUE)
 ```
 
-We will now use gene overrepresentation analysis as implemented in the package `r Biocpkg("topGO")` on the ranked genes to see if we can annotate the cluster.
+Now we can conduct GO enrichment analysis as implemented in the package `r Biocpkg("topGO")` using the most cluster-specific genes from the Association Plot. By default we use all genes with the positive $S_alpha$ score, or 1,000 genes with the highest $S_\alpha$ score if there are more than 1,000 genes with the $S_\alpha$ above 0. 
 
 ```{r topGO, message=FALSE}
 enr <- apl_topGO(ca,
@@ -380,7 +391,7 @@ enr <- apl_topGO(ca,
 plot_enrichment(enr)
 ```
 
-The GO enrichment analysis clearly suggests that cells in cluster 3 are B cells. We can further look at the number of typical B cell marker genes in the Association Plot.
+Additionally, in the Association Plot we can highlight genes of interest identified for instance using the GO enrichment analysis. In the example below we highlight two B canonical B cell markers.
 
 ```{r bcell_apl, fig.wide = TRUE}
 
@@ -396,8 +407,6 @@ apl(ca,
     type = "ggplot")
 
 ```
-
-All of these B cell marker genes are clearly highly associated with the cluster 3, which confirms the correct annotation we did in the preprocessing of the data.
 
 
 # Session info {.unnumbered}

@@ -71,7 +71,7 @@ conda install pytorch
 
 # Preprocessing
 ## Setup
-For this vignette we will use as an example the 3k Peripheral Blood Mononuclear Cell (PBMC) data from 10x Genomics.
+In this vignette we will use the 3k Peripheral Blood Mononuclear Cell (PBMC) data from 10x Genomics as an example.
 The data necessary to follow the vignette can be downloaded from [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
 
 Besides the package `r Rpackage("APL")` we will use the single-cell RNA-seq analysis suite `r CRANpkg("Seurat")` (V. 4.0.4) to preprocess the data, but the preprocessing could equally be done with `r Biocpkg("SingleCellExperiment")` and `r Biocpkg("scater")`\\`r Biocpkg("scran")`.
@@ -86,29 +86,33 @@ set.seed(1234)
 ```
 
 ## Loading the data
+We start with the loading and preprocessing of the 3k PBMC data:
+
 **CHANGE FILE PATH OR FIND OTHER SOLUTION**
 ```{r load_data, message=FALSE, warning=FALSE}
 # Load the PBMC dataset
 pbmc.data <- Read10X(data.dir = "/project/markers/CA/manuscript_scdata/sc_data_PBMC3k/original_data/pbmc3k_filtered_gene_bc_matrices/filtered_gene_bc_matrices/hg19/")
 
-# Remove genes not expressed in any gene.
+# Remove genes not expressed in any gene
 no_zeros_rows <- rowSums(pbmc.data) > 0
 pbmc.data <- pbmc.data[no_zeros_rows,]
 
-# Initialize the Seurat object with the raw (non-normalized data).
+# Initialize the Seurat object with the raw (non-normalized data)
 pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
 
 pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 
-# filter data
+# Filter data
 pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
 
 ```
 
 ## Normalization, PCA & Clustering
+Association Plots from "APL" should be computed based on the normalized expression data. Therefore, we first normalize the counts from the 3k PBMC data. For now, "APL" requires the data to be clustered beforehand. That's why we also do the clustering.
+
 ```{r preprocessing}
 
-# normalization
+# Normalization
 pbmc <- NormalizeData(pbmc,
                       normalization.method = "LogNormalize",
                       scale.factor = 10000,
@@ -119,7 +123,7 @@ pbmc <- FindVariableFeatures(pbmc,
                              nfeatures = 2000,
                              verbose = FALSE)
 
-# scaling
+# Scaling
 all.genes <- rownames(pbmc)
 pbmc <- ScaleData(pbmc,
                   features = all.genes,
@@ -130,7 +134,7 @@ pbmc <- RunPCA(pbmc,
                features = VariableFeatures(object = pbmc),
                verbose = FALSE)
 
-# Cluster cells
+# Cell clustering
 pbmc <- FindNeighbors(pbmc, dims = 1:10, verbose = FALSE)
 pbmc <- FindClusters(pbmc, resolution = 0.5, verbose = FALSE)
 

@@ -78,7 +78,7 @@ check_cacomp <- function(object) {
     errors <- c(errors, msg)
   }
 
-  # standard coordinates
+  # standardized coordinates
 
   if (isTRUE(!is.empty(object@std_coords_rows) & nrow(object@std_coords_rows) != dim_rows)) {
     msg <- paste0("Nr. of rows in std_coords_rows is ", nrow(object@std_coords_rows), ".  Should be ", dim_rows, ".")
@@ -123,7 +123,7 @@ check_cacomp <- function(object) {
     errors <- c(errors, msg)
   }
 
-  # APL coordinates
+  # AP coordinates
 
   if (isTRUE(!is.empty(object@apl_rows) & nrow(object@apl_rows) != dim_rows)) {
     msg <- paste0("Nr. of rows in apl_rows is ", ncol(object@apl_rows), ".  Should be ", dim_rows, ".")
@@ -145,7 +145,7 @@ check_cacomp <- function(object) {
     errors <- c(errors, msg)
   }
 
-  # APL score
+  # Salpha score
   if (isTRUE(!is.empty(object@APL_score) & ncol(object@APL_score) != 4)) {
     msg <- paste0("Nr. of columns in APL_score is ", ncol(object@APL_score), ".  Should be 4.")
     errors <- c(errors, msg)
@@ -168,12 +168,12 @@ check_cacomp <- function(object) {
 #' @slot U class "matrix". Left singular vectors of the original input matrix.
 #' @slot V class "matrix". Right singular vectors of the original input matrix.
 #' @slot D class "numeric". Singular values of the original inpt matrix.
-#' @slot std_coords_rows class "matrix". Standard CA coordinates of the rows.
-#' @slot std_coords_cols class "matrix". Standard CA coordinates of the columns.
+#' @slot std_coords_rows class "matrix". Standardized CA coordinates of the rows.
+#' @slot std_coords_cols class "matrix". Standardized CA coordinates of the columns.
 #' @slot prin_coords_rows class "matrix". Principal CA coordinates of the rows.
 #' @slot prin_coords_cols class "matrix". Principal CA coordinates of the columns.
-#' @slot apl_rows class "matrix". Association plot coordinates of the rows for the direction defined in slot "group"
-#' @slot apl_cols class "matrix". Association plot coordinates of the columns for the direction defined in slot "group"
+#' @slot apl_rows class "matrix". Association Plot coordinates of the rows for the direction defined in slot "group"
+#' @slot apl_cols class "matrix". Association Plot coordinates of the columns for the direction defined in slot "group"
 #' @slot APL_score class "data.frame". Contains rows sorted by the APL score.
 #' Columns: Rowname (gene name in the case of gene expression data),
 #' APL score calculated for the direction defined in slot "group",

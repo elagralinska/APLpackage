@@ -39,7 +39,9 @@ bioRxiv 2020.10.23.352096; doi: https://doi.org/10.1101/2020.10.23.352096
 
 For a mathematical description of the method, please refer to the manuscript.
 
-# Pytorch installation
+# Installation
+
+The "APL" package requires R version >= 4.0.
 
 In order to decrease the computation time of the singular value decomposition (SVD), we highly recommend the installation of `pytorch`. More information on `pytorch` installation are given below.
 Instead, users can also opt to use the R native SVD. For this, please turn the argument `python = FALSE` wherever applicable in this vignette.
@@ -174,7 +176,7 @@ runAPL(pbmc,
 ```
 The generated Association Plot is computed based on the log-normalized count matrix using 200 CA dimensions (parameter `dims`). The cluster-specificity score ($S_\alpha$) for each gene is also calculated (`score = TRUE`). More information on the choice of dimension number and the score $S_\alpha$ is present in the next section of the vignette.
 
-# Standard way of computing Association Plots
+# Step-by-step way of computing Association Plots
 
 Alternatively, Association Plots can be computed step-by-step. This allows to adjust the Association Plots to user's needs. Below we explain each step of the process of generating Association Plots.
 
@@ -196,19 +198,22 @@ ca <- cacomp(obj = pbmc,
 
 ```
 
-The function `cacomp` takes as input any non-negative count matrix, be it a single-cell RNA-seq, bulk RNA-seq or other data. If we would like to perform feature selection before CA, we can set the argument `top` to the desired number of genes to keep based on the variance of the chi-square components matrix. 
-For ease of use it additionally accepts `r CRANpkg("Seurat")` and `r Biocpkg("SingleCellExperiment")` objects, however for these we have to additionally have to specify via the `assay` and/or `slot` (for Seurat) parameter from where to extract the data. The output of `cacomp` is an object of class `cacomp`:
+The function `cacomp` accepts as an input any matrix with non-negative entries, be it a single-cell RNA-seq, bulk RNA-seq or other data. For ease of use, `cacomp` accepts also `r CRANpkg("Seurat")` and `r Biocpkg("SingleCellExperiment")` objects, however for these we additionally have to specify via the `assay` and/or `slot` (for Seurat) parameter from where to extract the data. 
+
+When performing a feature selection before CA, we can set the argument `top` to the desired number of genes with the higest variance across cells from the input data to retain for further analysis. By default, 5,000 genes are kept.
+
+The output of `cacomp` is an object of class `cacomp`:
 ```{r print_cacomp}
 ca
 ```
 
-As can be seen in the summarized output, by default both the standard and principal coordinates in CA space are calculated.
-Once we calculate the necessary coordinates for the APL, these will also be shown in the output. Slots are accessed similarly to other S4 classes:
+As can be seen in the summarized output, by default both types of coordinates in the CA space (principal and standardized) are calculated.
+Once the coordinates for the Association Plot are calculate, they will also be shown in the output of `cacomp`. Slots are accessed similarly to other S4 classes:
 ```{r std_coords}
 ca@std_coords_cols[1:5,1:5]
 ```
 
-In the case for both `r CRANpkg("Seurat")` and `r Biocpkg("SingleCellExperiment")` objects, we can alternatively set `return_input = TRUE` to get the input object back, with the CA results stored in the appropriate slot for dimensional reductions. This also enables us to use the plotting functions that come with these packages:
+In the case of `r CRANpkg("Seurat")` and `r Biocpkg("SingleCellExperiment")` objects, we can alternatively set `return_input = TRUE` to get the input object back, with the CA results computed by "APL" and stored in the appropriate slot for dimension reduction. This also allows for using the plotting functions that come with these packages:
 
 ```{r ca_pbmc}
 pbmc <- cacomp(obj = pbmc,
@@ -222,28 +227,29 @@ DimPlot(pbmc, reduction = "CA", label = FALSE, pt.size = 0.5)
 ```
 
 ## Visualization of CA
-In order to visualize both cells and genes in a so-called biplot, we however need a `cacomp` object. We can convert to a `cacomp` object from `r CRANpkg("Seurat")` or `r Biocpkg("SingleCellExperiment")` objects that have CA results stored with the function `as.cacomp()`.
+In addition to Association Plots "APL" produces also other forms of the output. For instance, we can use "APL" to generate a two- and three-dimensional projection of the data in the correspondence analysis space. The so-called biplot visualizes then both cells and genes from the input data. To generate such biplots a `cacomp` object is required. We can convert `r CRANpkg("Seurat")` or `r Biocpkg("SingleCellExperiment")` objects, which have the CA results stored, to a `cacomp` object using the function `as.cacomp()`:
 
 ```{r biplot, fig.wide = TRUE}
+# Converting the object pbmc
 ca <- as.cacomp(pbmc)
 
+# Specifying a cell cluster of interest
 platelets <- which(pbmc$cell_type == "8 - Platelet")
 
-# for a static plot
+# Creating a static plot
 # ca_biplot(ca, type = "ggplot", col_labels = platelets)
 
-# interactive plot
+# Creating an interactive plot
 ca_biplot(ca, col_labels = platelets)
 
 ```
-In order to explore more than 2 dimensions at once, a 3D plot can often be helpful:
-
+A three-dimensional data projection plot can be generated using the function `ca_3Dplot`:
 ```{r 3dplot, fig.wide = TRUE}
 ca_3Dplot(ca, col_labels = platelets)
 
 ```
 
-The above plots let us interactively explore the CA space. If a static version is preferred we can obtain it by setting `type = "ggplot"`. This option is available for all plotting functions with interactive plots (with the exception of the 3D plot).
+The above described plots let us interactively explore the CA projection of the data. For a static version of the plot the paramter `type = "ggplot"` should be used. This option is available for all plotting functions with interactive plots (except for the three-dimensional data projection).
 
 ## Choosing the dimensionality
 Often we want to only keep as many dimensions of our data as is necessary in order to denoise the data and speed up downstream analysis. For PCA, this is traditionally done by identifying the "bend" in the scree plot of the exaplained variability. For CA we instead look at the inertia that is explained by the data:

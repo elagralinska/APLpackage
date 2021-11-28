@@ -1,15 +1,15 @@
 #' @include constructor.R
 NULL
 
-#' Plot of the first 3 CA dimensions.
+#' Plot of the first 3D CA projection of the data.
 #'
 #' @description
 #' Plots the first 3 dimensions of the rows and columns in the same plot.
 #'
 #' @details
 #' Depending on whether `princ_coords` is set to 1 or 2 either the principal coordinates of either the rows (1) or the columns (2)
-#' are chosen. For the other the standard coordinates are plotted (assymetric biplot).
-#' Labels for rows and columns should be stored in the row- and columnnames respectively.
+#' are chosen. For the other the standardized coordinates are plotted (assymetric biplot).
+#' Labels for rows and columns should be stored in the row- and column names respectively.
 #' @return
 #' Plot of class "plotly".
 #'
@@ -173,7 +173,7 @@ setMethod(f = "ca_3Dplot",
   if ("CA" %in% Reductions(obj)){
     caobj <- as.cacomp(obj, assay = assay, slot = slot)
   } else {
-    stop("No 'CA' dim. reduction object found. Please run cacomp(seurat_obj, assay) first.")
+    stop("No 'CA' dimension reduction object found. Please run cacomp(seurat_obj, assay) first.")
   }
 
   p <- ca_3Dplot(obj = caobj,
@@ -207,7 +207,7 @@ setMethod(f = "ca_3Dplot",
   if ("CA" %in% reducedDimNames(obj)){
     caobj <- as.cacomp(obj, assay = assay)
   } else {
-    stop("No 'CA' dim. reduction object found. Please run cacomp(sce, top, coords = FALSE, return_input=TRUE) first.")
+    stop("No 'CA' dimension reduction object found. Please run cacomp(sce, top, coords = FALSE, return_input=TRUE) first.")
   }
 
   p <- ca_3Dplot(obj = caobj,
@@ -220,7 +220,7 @@ setMethod(f = "ca_3Dplot",
   return(p)
 })
 
-#' Plot of the first 2 CA dimensions.
+#' Plot of 2D CA projection of the data.
 #'
 #' @description
 #' Plots the first 2 dimensions of the rows and columns in the same plot.
@@ -235,7 +235,7 @@ setMethod(f = "ca_3Dplot",
 #' @return
 #' Plot of class "plotly" or "ggplot".
 #'
-#' @param obj An object of class "cacomp" with the relevant standard and principal coordinates calculated,
+#' @param obj An object of class "cacomp" with the relevant standardized and principal coordinates calculated,
 #'  or alternatively an object of class "Seurat" or "SingleCellExperiment" with a dim. reduction named "CA" saved.
 #' @param xdim Integer. The dimension for the x-axis. Default 1.
 #' @param ydim Integer. The dimension for the y-axis. Default 2.
@@ -455,7 +455,7 @@ setMethod(f = "ca_biplot",
   if ("CA" %in% reducedDimNames(obj)){
     caobj <- as.cacomp(obj, assay = assay)
   } else {
-    stop("No 'CA' dim. reduction object found. Please run cacomp(sce, top, coords = FALSE, return_input=TRUE) first.")
+    stop("No 'CA' dimension reduction object found. Please run cacomp(sce, top, coords = FALSE, return_input=TRUE) first.")
   }
 
 
@@ -472,7 +472,7 @@ setMethod(f = "ca_biplot",
 
 #' Generates plot for results from apl_topGO
 #' @description
-#' Plots the results form the data frame generated via apl_topGO.
+#' Plots the results from the data frame generated via apl_topGO.
 #'
 #' @param genenr data.frame. gene enrichment results table.
 #' @param ntop numeric. Number of elements to plot.

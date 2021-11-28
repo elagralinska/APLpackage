@@ -12,7 +12,7 @@ NULL
 #' A cacomp object with additional calculated row_masses, col_masses, std_coords_rows, U and V.
 #'
 #' @param calist A list with std_coords_cols, the prin_coords_rows and D.
-#' @param mat A matrix from which the cacomp object derives from.
+#' @param mat A matrix from which the cacomp object is derived from.
 #' @param rm_zeros Removes rows & columns containing only zeros.
 #' @param ... Further arguments forwarded to cacomp.
 recompute <- function(calist, mat, rm_zeros = TRUE, ...){
@@ -341,7 +341,7 @@ setMethod(f = "as.cacomp", signature=(obj="Seurat"), function(obj, ..., assay="R
 
 
 #' @description
-#' as.cacomp.SingleCellExperiment: Converts the values stored in the SingleCellExperiment reducedDim slot "CA" to an cacomp object.
+#' as.cacomp.SingleCellExperiment: Converts the values stored in the SingleCellExperiment reducedDim slot "CA" to a cacomp object.
 #'
 #' @rdname as.cacomp
 #' @export
@@ -368,8 +368,8 @@ setMethod(f = "as.cacomp",
           function(obj, ..., assay="counts") {
 
   sce_ca <- SingleCellExperiment::reducedDim(obj, "CA")
-  stopifnot("Attribute singval of dimensional reduction slot CA is empty.\nThis can happen after subsetting the sce obj." = !is.null(attr(sce_ca, "singval")))
-  stopifnot("Attribute prin_coords_rows of dimensional reduction slot CA is empty.\nThis can happen after subsetting the sce obj." = !is.null(attr(sce_ca, "prin_coords_rows")))
+  stopifnot("Attribute singval of dimension reduction slot CA is empty.\nThis can happen after subsetting the sce obj." = !is.null(attr(sce_ca, "singval")))
+  stopifnot("Attribute prin_coords_rows of dimension reduction slot CA is empty.\nThis can happen after subsetting the sce obj." = !is.null(attr(sce_ca, "prin_coords_rows")))
 
   ca_list <- list("std_coords_cols" = sce_ca,
                   "D" = attr(sce_ca, "singval"),

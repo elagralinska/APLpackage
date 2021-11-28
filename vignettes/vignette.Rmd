@@ -7,7 +7,7 @@ author:
 - name: Clemens Kohl
   affiliation: Max Planck Institute for Molecular Genetics
   email: kohl@molgen.mpg.de
-- name: Martin Vingron Kohl
+- name: Martin Vingron
   affiliation: Max Planck Institute for Molecular Genetics
   email: vingron@molgen.mpg.de
 package: APL
@@ -27,7 +27,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
   
 # Introduction
 
-About APL, Association Plots, finding cluster-specific genes, etc.
+"APL" is a package developed for computation of Association Plots, a method for visualization and analysis of single cell transcriptomics data. The main focus of "APL" is the identification of genes characteristic for individual clusters of cells from input data. 
 
 
 When working with `r Rpackage("APL")` package please cite:
@@ -40,8 +40,9 @@ bioRxiv 2020.10.23.352096; doi: https://doi.org/10.1101/2020.10.23.352096
 For a mathematical description of the method, please refer to the manuscript.
 
 # Pytorch installation
-In order to speed up the singular value decomposition, we highly recommend the installation of `pytorch`.
-Users can instead also opt to instead use the slower R native SVD. For this please turn the argument `python = FALSE` wherever applicable in this vignette.
+
+In order to decrease the computation time of the singular value decomposition (SVD), we highly recommend the installation of `pytorch`. More information on `pytorch` installation are given below.
+Instead, users can also opt to use the R native SVD. For this, please turn the argument `python = FALSE` wherever applicable in this vignette.
 
 
 ## Install pytorch with reticulate
@@ -53,7 +54,7 @@ conda_install(envname = "r-reticulate", packages = "pytorch")
 ```
 
 ## Manually install pytorch with conda
-Download the appropriate Miniconda installer for your system from [the conda website](https://docs.conda.io/en/latest/miniconda.html). 
+To install `pytorch` please download the appropriate Miniconda installer for your system from [the conda website](https://docs.conda.io/en/latest/miniconda.html). 
 Follow the installation instructions on their website and make sure the R package `reticulate` is also installed before proceeding.
 Once installed, list all available conda environments via <br>
 `conda info --envs` <br>
@@ -70,10 +71,11 @@ conda install pytorch
 
 # Preprocessing
 ## Setup
-For this vignette we will use 3k Peripheral Blood Mononuclear Cell (PBMC) data from 10x Genomics.
+For this vignette we will use as an example the 3k Peripheral Blood Mononuclear Cell (PBMC) data from 10x Genomics.
 The data necessary to follow the vignette can be downloaded from [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
-Besides the package `r Rpackage("APL")` we will be using the single-cell RNAseq analysis suite `r CRANpkg("Seurat")` (V. 4.0.4) to preprocess the data, but the preprocessing could equally be done with `r Biocpkg("SingleCellExperiment")` and `r Biocpkg("scater")`\\`r Biocpkg("scran")`.
-For the preprocessing we follow the [Guided Clustering Tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) from the Seurat vignettes. For details about the data preprocessing please to refer to their website.
+
+Besides the package `r Rpackage("APL")` we will use the single-cell RNA-seq analysis suite `r CRANpkg("Seurat")` (V. 4.0.4) to preprocess the data, but the preprocessing could equally be done with `r Biocpkg("SingleCellExperiment")` and `r Biocpkg("scater")`\\`r Biocpkg("scran")`.
+For the preprocessing we follow the [Guided Clustering Tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) from the Seurat vignette. For details about the data preprocessing please refer to their website.
 
 ```{r setup, message=FALSE, warning=FALSE}
 library(APL)

@@ -143,9 +143,11 @@ pbmc <- RunUMAP(pbmc, dims = 1:10, verbose = FALSE)
 new.cluster.ids <- c("0 - Naive CD4 T",
                      "1 - CD14+ Mono", 
                      "2 - Memory CD4 T", 
-                     "3 - B", "4 - CD8 T", 
+                     "3 - B", 
+                     "4 - CD8 T", 
                      "5 - FCGR3A+ Mono", 
-                     "6 - NK", "7 - DC", 
+                     "6 - NK", 
+                     "7 - DC", 
                      "8 - Platelet")
 
 names(new.cluster.ids) <- levels(pbmc)
@@ -155,13 +157,33 @@ pbmc$cell_type <- Idents(pbmc)
 DimPlot(pbmc, reduction = "umap", label = F, pt.size = 0.5)
 ```
 
-# Correspondence Analysis
-In a first step we perform correspondence analysis (CA) on the log-normalized 
-counts from the data. CA is a method for dimensionality reduction similar to PCA,
-but allows to represent both cells and genes in the same space. 
+# Fast way of computing Association Plots
+
+The fastest way to compute the Association Plot for a selected cluster of cells from the input data is by using a wrapper function `runAPL()`. `runAPL()` automates most of the analysis steps for ease of use. 
+
+For example, to generate the Association Plot for the B cells (cluster: "3 - B") we can use the following command:
+
+```{r}
+runAPL(pbmc,
+       assay = "RNA",
+       slot = "data",
+       group = which(pbmc$seurat_clusters == 3),
+       score = TRUE,
+       dims = 220,
+       show_cols = FALSE)
+```
+The generated Association Plot is computed based on the log-normalized count matrix using 200 CA dimensions (parameter `dims`). The cluster-specificity score ($S_\alpha$) for each gene is also calculated (`score = TRUE`). More information on the choice of dimension number and the score $S_\alpha$ is present in the next section of the vignette.
+
+# Standard way of computing Association Plots
+
+Alternatively, Association Plots can be computed step-by-step. This allows to adjust the Association Plots to user's needs. Below we explain each step of the process of generating Association Plots.
+
+## Correspondence Analysis
+The first step of Association Plot computations is correspondence analysis (CA). CA is a data dimensionality reduction similar to PCA, however it allows for a simultaneous embedding of both cells and genes from the input data in the same space. 
+In this example we perform CA on the log-normalized count matrix from the 3k PBMC data.
 
 ```{r cacomp}
-# CA on logcounts
+# Computing CA on logcounts
 logcounts <- as.matrix(GetAssayData(pbmc, slot = "data"))
 ca <- cacomp(obj = logcounts,
              python = TRUE)
@@ -370,20 +392,6 @@ apl(ca,
 ```
 
 All of these B cell marker genes are clearly highly associated with the cluster 3, which confirms the correct annotation we did in the preprocessing of the data.
-
-## APL wrapper
-
-The package also includes a wrapper function `runAPL()` that automates most of the steps above for ease of use. 
-```{r}
-runAPL(pbmc,
-       assay = "RNA",
-       slot = "data",
-       group = which(pbmc$seurat_clusters == 3),
-       score = TRUE,
-       dims = 220,
-       show_cols = FALSE)
-```
-
 
 
 # Session info {.unnumbered}
